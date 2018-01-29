@@ -12,6 +12,9 @@ from sklearn import linear_model
 
 import pandas.io.common
 
+import scipy.optimize as opt
+import os
+
 class LogRegression():
 	
 	def __init__(self, path=None):
@@ -35,31 +38,72 @@ class LogRegression():
 
 		if (data is None):
 			data = self.x
-		g_z = 1 / (1 + np.exp(data))
+		g_z = 1 / (1 + np.exp(-data))
 		return (g_z)
 
-	def costFunction(self, thetta=np.zeros((3, 1))):
+	def costFunction(self, thetta, X, y):
 		
-		#thetta = np.zeros((3, 1))
-		ones = np.ones((self._l))
-		hypotesis = self.sygmoid(np.dot(self.x, thetta))
+		# thetta = np.zeros((3, 1))
+		# ones = np.ones((self._l))
+		hypotesis = self.sygmoid(np.dot(X, thetta))
 		log_hypotesis = np.log(hypotesis)
-		log_hypotesis_2 = np.log(np.subtract(ones, hypotesis))
-		first_part = np.dot(np.dot(self.y, -1), log_hypotesis)
-		second_part = np.dot((np.subtract(ones, self.y)), log_hypotesis_2)
+		log_hypotesis_2 = np.log(np.subtract(1, hypotesis)) # WTF? Here I swap "ones on "1" and all good
+		first_part = np.dot(-y, log_hypotesis)
+		second_part = np.dot((np.subtract(1, y)), log_hypotesis_2)
 
 		list_ = np.subtract(first_part, second_part)
 		J_cost = (1 / self._l) * np.sum(list_)
 		return (J_cost)
 		
-	def gradient(self, thetta=np.zeros((3, 1))):
+	def gradient(self, thetta, X, y):
 
-		hypotesis = self.sygmoid(np.dot(self.x, thetta))
+		hypotesis = self.sygmoid(np.dot(X, thetta))
 		hypotesis = np.reshape(hypotesis, self._l)
-		list_ = np.dot(np.subtract(hypotesis, self.y), self.x)
-		sum_ = np.sum(list_)
+		list_ = np.dot(np.subtract(hypotesis, y), X)
+		#sum_ = np.sum(list_)
 
-		return ((1 / self._l) * sum_)
+		return (np.dot(1 / self._l, list_))
+
+	# def costFunction(self, thetta=np.zeros((3, 1))):
+		
+	# 	# thetta = np.zeros((3, 1))
+	# 	# ones = np.ones((self._l))
+	# 	hypotesis = self.sygmoid(np.dot(self.x, thetta))
+	# 	log_hypotesis = np.log(hypotesis)
+	# 	log_hypotesis_2 = np.log(np.subtract(1, hypotesis)) # WTF? Here I swap "ones on "1" and all good
+	# 	first_part = np.dot(-self.y, log_hypotesis)
+	# 	second_part = np.dot((np.subtract(1, self.y)), log_hypotesis_2)
+
+	# 	list_ = np.subtract(first_part, second_part)
+	# 	J_cost = (1 / self._l) * np.sum(list_)
+	# 	return (J_cost)
+		
+	# def gradient(self, thetta=np.zeros((3, 1))):
+
+	# 	hypotesis = self.sygmoid(np.dot(self.x, thetta))
+	# 	hypotesis = np.reshape(hypotesis, self._l)
+	# 	list_ = np.dot(np.subtract(hypotesis, self.y), self.x)
+	# 	sum_ = np.sum(list_)
+
+	# 	return ((1 / self._l) * sum_)
+
+	def optimizeFunc(self, thetta=np.zeros(3)):#, func=None, x0=None, fprime=None, args=None):
+			
+			# if x0 == None:
+			# 	x0 = np.zeros(3)
+			# else:
+			# 	x0 = x0.reshape(1)
+			# if fprime == None:
+			# 	fprime = self.gradient(x0)
+			# if args == None:
+			# 	args = (self.x, self.y)
+			# if func == None:
+			# 	func = self.costFunction(x0)
+
+			#print(type(x0[0]))
+			result = opt.fmin_tnc(func=self.costFunction, x0=thetta, fprime=self.gradient, args=(self.x, self.y))
+			cs = self.costFunction(result[0], self.x, self.y)
+			print(result, cs)
 
 
 	def plotData(self):
@@ -78,10 +122,13 @@ class LogRegression():
 
 def main():
 
-	path = "/home/rishchen/Source/ML/CourseTF/Tensorflow-Bootcamp-master/Source/LogisiticRegression/ex2data1.txt"
+	#path = "/home/rishchen/Source/ML/CourseTF/Tensorflow-Bootcamp-master/Source/LogisiticRegression/ex2data1.txt"
+	path = os.getcwd() + "/ex2data1.txt"
 	LR = LogRegression(path)
-	#print(LR.sygmoid(0))
-	LR.costFunction()
+	print(LR.sygmoid(0))
+	# z = np.zeros(3)
+	# print(LR.costFunction(z))
+	LR.optimizeFunc()
 	#print(LR.x[1:,0]
 	#print(LR._df[0])
 	# LR.plotData()
