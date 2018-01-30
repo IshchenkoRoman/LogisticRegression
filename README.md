@@ -12,6 +12,6 @@ this directory before starting this exercise.
 You can also find instructions for installing Octave/MATLAB in the “En-
 vironment Setup Instructions” of the course website.
 ```
-**WARNING**
-Code was implemented on ~~Octave/MATLAB~~ Python 3.5.4 with libraries *numpy* **(1.13.3)** *pandas* **(0.22.0)** *matplotlib* **(2.1.1)**
+WARNING
+Code was implemented on ~~Octave/MATLAB~~ Python 3.5.4 with libraries numpy (1.13.3) pandas (0.22.0) matplotlib (2.1.1)
 ```
