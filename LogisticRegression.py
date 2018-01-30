@@ -29,10 +29,8 @@ class LogRegression():
 
 		self._l = len(x_1)
 		ones = np.ones((self._l, 1))
-		#self.x = np.append(np.ones((1,2)), np.column_stack((x_1,x_2)), axis=0)
 		self.x = np.c_[ones, x_1, x_2]
 		self.y = self._df.iloc[:,2]
-		#self._l = len(self._df.iloc[:,0])
 
 	def sygmoid(self, data = None):
 
@@ -60,7 +58,6 @@ class LogRegression():
 		hypotesis = self.sygmoid(np.dot(X, thetta))
 		hypotesis = np.reshape(hypotesis, self._l)
 		list_ = np.dot(np.subtract(hypotesis, y), X)
-		#sum_ = np.sum(list_)
 
 		return (np.dot(1 / self._l, list_))
 
@@ -87,38 +84,54 @@ class LogRegression():
 
 	# 	return ((1 / self._l) * sum_)
 
-	def optimizeFunc(self, thetta=np.zeros(3)):#, func=None, x0=None, fprime=None, args=None):
+	def optimizeFunc(self, thetta=np.zeros(3)):
 			
-			# if x0 == None:
-			# 	x0 = np.zeros(3)
-			# else:
-			# 	x0 = x0.reshape(1)
-			# if fprime == None:
-			# 	fprime = self.gradient(x0)
-			# if args == None:
-			# 	args = (self.x, self.y)
-			# if func == None:
-			# 	func = self.costFunction(x0)
-
-			#print(type(x0[0]))
 			result = opt.fmin_tnc(func=self.costFunction, x0=thetta, fprime=self.gradient, args=(self.x, self.y))
 			cs = self.costFunction(result[0], self.x, self.y)
-			print(result, cs)
+			return (result[0])
+
+	def predict(self, thetta=np.zeros(3), exam1=45, exam2=85):
+
+		arr = np.ones(3)
+		arr[1] = exam1
+		arr[2] = exam2
+
+		dot = np.dot(arr, thetta)
+		res = self.sygmoid(dot)
+		print(res)
+		return (1 if res > 0.5 else 0)
+
+	def _plot(self, label_x, label_y, label_pos, label_neg, axes=None):
+
+		neg = self._df.iloc[:,2] == 0
+		pos = self._df.iloc[:,2] == 1
+
+		if axes == None:
+			axes = plt.gca()
+
+		axes.scatter(self._df[pos][0], self._df[pos][1], marker='+', c='k', s=60, linewidths=2, label=label_pos)
+		axes.scatter(self._df[neg][0], self._df[neg][1], c='y', s=60, label=label_neg)
+		axes.set_xlabel(label_x)
+		axes.set_ylabel(label_y)
+		axes.legend(frameon = True, fancybox = True)
 
 
-	def plotData(self):
+	def plotDecisionBoundary(self, label_x, label_y, label_pos, label_neg, thetta=np.ones(3), exam1=45, exam2=85, axes=None, type=1):
 
-		plt.figure(1)
-		plt.axis([30, 100, 30, 100])
-		# Cut down redument [1, 1] and take column data of first and second scores exams
-		for x1, x2, y in zip(self.x[1:,0], self.x[1:,1], self.y):
-			if (y == 1):
-				m, c = '+', 'k'
-			else:
-				m, c = 'o', 'y'
-			plt.plot(x1, x2, m, color = c, mew=2)
+		if type == 2:
+			str_label_input_ex = "({0}, {1})".format(exam1, exam2)
+			plt.scatter(exam1, exam2, s=60, c='r', marker='v', label=str_label_input_ex)
+			x1_min, x1_max = self.x[:,1].min(), self.x[:,1].max()
+			x2_min, x2_max = self.x[:,2].min(), self.x[:,2].max()
+			xx1, xx2 = np.meshgrid(np.linspace(x1_min, x1_max), np.linspace(x2_min, x2_max))
+			h = self.sygmoid(np.c_[np.ones((xx1.ravel().shape[0], 1)), xx1.ravel(), xx2.ravel()].dot(thetta))
+			h = h.reshape(xx1.shape)
+			plt.contour(xx1, xx2, h, [0.5], linewidths=1, colors='b')
+
+		self._plot(label_x, label_y, label_pos, label_neg, axes)
 
 		plt.show()
+
 
 def main():
 
@@ -126,15 +139,17 @@ def main():
 	path = os.getcwd() + "/ex2data1.txt"
 	LR = LogRegression(path)
 	print(LR.sygmoid(0))
-	# z = np.zeros(3)
+	z = np.zeros(3)
 	# print(LR.costFunction(z))
-	LR.optimizeFunc()
+	thetta = LR.optimizeFunc()
+	print("thetta = {0}".format(thetta))
+	LR.predict(thetta)
 	#print(LR.x[1:,0]
 	#print(LR._df[0])
-	# LR.plotData()
+	#LR.plotData1()
+	LR.plotDecisionBoundary('Exam score 1', 'Exam score 2', 'Admitted', 'Not admitted', thetta=thetta, type=2)
 	#print(LR.sygmoid())
 	# print(LR.gradient())
 
-#
 if __name__ == '__main__':
 	main()
