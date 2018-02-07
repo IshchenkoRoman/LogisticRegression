@@ -61,29 +61,6 @@ class LogRegression():
 
 		return (np.dot(1 / self._l, list_))
 
-	# def costFunction(self, thetta=np.zeros((3, 1))):
-		
-	# 	# thetta = np.zeros((3, 1))
-	# 	# ones = np.ones((self._l))
-	# 	hypotesis = self.sygmoid(np.dot(self.x, thetta))
-	# 	log_hypotesis = np.log(hypotesis)
-	# 	log_hypotesis_2 = np.log(np.subtract(1, hypotesis)) # WTF? Here I swap "ones on "1" and all good
-	# 	first_part = np.dot(-self.y, log_hypotesis)
-	# 	second_part = np.dot((np.subtract(1, self.y)), log_hypotesis_2)
-
-	# 	list_ = np.subtract(first_part, second_part)
-	# 	J_cost = (1 / self._l) * np.sum(list_)
-	# 	return (J_cost)
-		
-	# def gradient(self, thetta=np.zeros((3, 1))):
-
-	# 	hypotesis = self.sygmoid(np.dot(self.x, thetta))
-	# 	hypotesis = np.reshape(hypotesis, self._l)
-	# 	list_ = np.dot(np.subtract(hypotesis, self.y), self.x)
-	# 	sum_ = np.sum(list_)
-
-	# 	return ((1 / self._l) * sum_)
-
 	def optimizeFunc(self, thetta=np.zeros(3)):
 			
 			result = opt.fmin_tnc(func=self.costFunction, x0=thetta, fprime=self.gradient, args=(self.x, self.y))
@@ -108,11 +85,12 @@ class LogRegression():
 
 		if axes == None:
 			axes = plt.gca()
-
-		axes.scatter(self._df[pos][0], self._df[pos][1], marker='+', c='k', s=60, linewidths=2, label=label_pos)
-		axes.scatter(self._df[neg][0], self._df[neg][1], c='y', s=60, label=label_neg)
+		
+		axes.scatter(self._df[pos][0], self._df[pos][1], marker='+', c='k', s=50, linewidths=2, label=label_pos)
+		axes.scatter(self._df[neg][0], self._df[neg][1], c='y', s=50, label=label_neg)
 		axes.set_xlabel(label_x)
 		axes.set_ylabel(label_y)
+		axe.set(xlim=[-1, 1.5], ylim=[-0.8, 1.2])
 		axes.legend(frameon = True, fancybox = True)
 
 
@@ -135,7 +113,6 @@ class LogRegression():
 
 def main():
 
-	#path = "/home/rishchen/Source/ML/CourseTF/Tensorflow-Bootcamp-master/Source/LogisiticRegression/ex2data1.txt"
 	path = os.getcwd() + "/ex2data1.txt"
 	LR = LogRegression(path)
 	print(LR.sygmoid(0))
@@ -144,8 +121,6 @@ def main():
 	thetta = LR.optimizeFunc()
 	print("thetta = {0}".format(thetta))
 	LR.predict(thetta)
-	#print(LR.x[1:,0]
-	#print(LR._df[0])
 	#LR.plotData1()
 	LR.plotDecisionBoundary('Exam score 1', 'Exam score 2', 'Admitted', 'Not admitted', thetta=thetta, type=2)
 	#print(LR.sygmoid())
